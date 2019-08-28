@@ -1,24 +1,36 @@
 {
-  "name": "app2",
+  "name": "vuego",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "buildAssets": "npm run build && go-bindata-assetfs -o ./server/assets.go dist/...",
+    "buildservWin": "npm run buildAssets && GOOS=windows GOARCH=386 go build -o vg386.exe ./server && ./vg386.exe",
+    "buildservWin64": "npm run buildAssets && set GOOS=windows&&set GOARCH=amd64&& go build -o vg64.exe ./server && vg64.exe",
+    "buildservNix": "npm run buildAssets && GOOS=linux GOARCH=amd64 go build -o vgnix ./server && ./vgnix",
+    "runServ": "go run server/assets.go server/main.go"
   },
   "dependencies": {
     "core-js": "^2.6.5",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "vuetify": "^2.0.0"
   },
   "devDependencies": {
+    "@mdi/font": "^4.2.95",
     "@vue/cli-plugin-babel": "^3.11.0",
     "@vue/cli-plugin-eslint": "^3.11.0",
     "@vue/cli-service": "^3.11.0",
+    "axios": "^0.19.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "sass": "^1.17.4",
+    "sass-loader": "^7.1.0",
+    "vue-cli-plugin-vuetify": "^0.6.3",
+    "vue-template-compiler": "^2.6.10",
+    "vuetify-loader": "^1.2.2"
   },
   "eslintConfig": {
     "root": true,

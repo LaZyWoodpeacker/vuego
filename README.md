@@ -1,4 +1,4 @@
-# app2
+# VueGo
 
 ## Project setup
 ```
@@ -25,5 +25,7 @@ npm run test
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### build assets for Go
+```
+npm run buildAssets
+```
