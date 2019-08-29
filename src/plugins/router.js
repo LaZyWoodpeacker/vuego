@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router'
-import Auth from './components/Auth'
-import List from './components/List'
+import Auth from '../components/Auth'
+import List from '../components/List'
 
 Vue.use(VueRouter)
 
