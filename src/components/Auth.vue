@@ -45,7 +45,9 @@ export default {
           login: this.authForm.login,
           pass: this.authForm.pass
         })
-        .then(res => {})
+        .then(res => {
+          this.$router.replace("/list");
+        })
         .catch(req => {
           alert(req);
         });

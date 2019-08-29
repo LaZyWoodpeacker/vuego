@@ -6,7 +6,6 @@ import List from '../components/List'
 Vue.use(VueRouter)
 
 export default new VueRouter({
-    mode: 'history',
     routes: [
         { path: '/auth', component: Auth },
         { path: '/list', component: List }

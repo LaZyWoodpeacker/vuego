@@ -10,11 +10,7 @@ export default {
   data: () => ({}),
   created() {
     this.$vuetify.theme.dark = true;
-    if (this.authCheck()) {
-      this.$router.push("/list");
-    } else {
-      this.$router.push("/auth");
-    }
+    this.getPage();
   },
   methods: {
     authCheck() {
@@ -26,6 +22,13 @@ export default {
           acc[key] = val;
           return acc;
         }, {}).auth;
+    },
+    getPage() {
+      if (this.authCheck()) {
+        this.$router.replace("/list");
+      } else {
+        this.$router.replace("/auth");
+      }
     }
   }
 };

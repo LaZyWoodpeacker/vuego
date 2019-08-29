@@ -21,4 +21,5 @@ yarn-error.log*
 *.sln
 *.sw?
 *.exe
+*.png
 vgnix

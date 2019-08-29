@@ -147,9 +147,7 @@ func main() {
 
 func sockMidlware(res http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Debug for socket
-		// w.Header().Set("Access-Control-Allow-Origin", strings.Replace(r.Host, "3000", "3001", 1))
-		w.Header().Set("Access-Control-Allow-Origin", r.Host)
+		// w.Header().Set("Access-Control-Allow-Origin", "http://"+r.Host)
 		res.ServeHTTP(w, r)
 	}
 }
