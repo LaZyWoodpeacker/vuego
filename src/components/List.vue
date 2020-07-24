@@ -2,6 +2,14 @@
   <v-app id="inspire">
     <v-navigation-drawer v-model="menuVisible" app clipped>
       <v-list dense>
+        <v-list-item @click="onRawData">
+          <v-list-item-action>
+            <v-icon>mdi-file-search-outline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Open</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item @click="onExit">
           <v-list-item-action>
             <v-icon>mdi-logout</v-icon>
@@ -21,16 +29,15 @@
       <v-container>
         <v-layout row wrap justify-center>
           <v-card v-for="i in list" :key="i.Name" width="200" outlined :raised="true">
-            <v-img class="white--text" height="200px" :src="'/api/images/'+i.Name"></v-img>
-            <v-card-title>{{ i.Name }}</v-card-title>
+            <v-img class="white--text" height="200px" :src="'/api/static/'+i.Name"></v-img>
+            <v-card-title class="card-title">{{ i.Name }}</v-card-title>
             <v-card-text>
               {{ new Date(i.ModTime*1000).toLocaleString("ru-RU",{ year: '2-digit',
               month: 'short',
               day: 'numeric',
               weekday:'long',
               hour:"numeric",
-              minute:"numeric",
-              timeZoneName:"short"
+              minute:"numeric"
               }) }}
             </v-card-text>
             <v-card-actions>
@@ -49,7 +56,7 @@
       <v-dialog v-model="chdialogValues.act" persistent max-width="600px" value="chdialogValue">
         <v-card>
           <v-card-title>
-            <span class="headline">Change filename</span>
+            <span class="headline">Rename</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -61,6 +68,17 @@
             <div class="flex-grow-1"></div>
             <v-btn color="blue darken-1" text @click="chdialogValues.act = false">Close</v-btn>
             <v-btn color="blue darken-1" text @click="onRename">Rename</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="fragDialog.act" max-width="290">
+        <v-card>
+          <v-card-title class="headline" v-html="fragDialog.dialogTitle"></v-card-title>
+          <v-card-text v-html="fragDialog.dialogMessage"></v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="fragDialog.act = false">No</v-btn>
+            <v-btn color="green darken-1" text @click="removeFile(fragDialog.fileName)">Yes</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -88,7 +106,7 @@ import axios from "axios";
 import io from "socket.io-client";
 export default {
   props: {
-    source: String
+    source: String,
   },
   data: () => ({
     name: "Media files",
@@ -97,14 +115,21 @@ export default {
     SOC: false,
     snackbar: {
       act: false,
-      message: ""
+      message: "",
     },
     chdialogValues: {
       act: false,
       oldFileName: "",
-      newFileName: ""
+      newFileName: "",
     },
-    auth: false
+    fragDialog: {
+      act: false,
+      dialogMessage: "",
+      fileName: "",
+      dialogTitle: "",
+      antwort: "no",
+    },
+    auth: false,
   }),
   created() {
     this.auth = this.authCheck();
@@ -117,18 +142,18 @@ export default {
   methods: {
     createSocket() {
       this.SOC = io(location.host, {
-        path: "/api/socket"
+        path: "/api/socket",
       });
       this.SOC.on("connect", () => (this.api_connected = true));
       this.SOC.on("disconnect", () => (this.api_connected = false));
-      this.SOC.on("CHANGEFS", data => {
+      this.SOC.on("CHANGEFS", (data) => {
         this.onInter();
       });
     },
     authCheck() {
       return document.cookie
         .split("; ")
-        .filter(e => e.length > 0)
+        .filter((e) => e.length > 0)
         .reduce((acc, em) => {
           let [key, val] = em.split("=");
           acc[key] = val;
@@ -136,9 +161,9 @@ export default {
         }, {}).auth;
     },
     onInter() {
-      axios.get("/api/files").then(res => {
+      axios.get("/api/files").then((res) => {
         this.list = res.data
-          .filter(e => {
+          .filter((e) => {
             return e.Name.match(/(png|bmp|jpeg|jpg|bmp|mp4|mpeg|mov)$/i);
           })
           .sort((a, b) => b.ModTime - a.ModTime);
@@ -147,6 +172,9 @@ export default {
     onExit() {
       document.cookie = "auth=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
       this.$router.push("/auth");
+    },
+    onRawData() {
+      window.location.href = "/api/static/";
     },
     onAddFile() {
       this.menuVisible = false;
@@ -160,33 +188,42 @@ export default {
           axios
             .post("/api/upload", formData, {
               headers: {
-                "Content-Type": "multipart/form-data"
-              }
+                "Content-Type": "multipart/form-data",
+              },
             })
-            .then(res => {
+            .then((res) => {
               // this.$refs.listRef.onInter();
             });
         }
       }, 1000);
     },
     onRemove(val) {
-      axios.post("/api/remove", { image: val }).then(res => {});
+      this.fragDialog.dialogMessage = "You sure" + val;
+      this.fragDialog.fileName = val;
+      this.fragDialog.dialogTitle = "Delete file?";
+      this.fragDialog.act = true;
+    },
+    removeFile(filename) {
+      axios.post("/api/remove", { image: filename }).then((res) => {
+        this.snackbar.message = "removed file" + filename;
+        this.snackbar.act = true;
+      });
     },
     onRename(val, val2) {
       if (this.chdialogValues.oldFileName !== this.chdialogValues.newFileName) {
         axios
           .post("/api/edit", {
             oldname: this.chdialogValues.oldFileName,
-            newname: this.chdialogValues.newFileName
+            newname: this.chdialogValues.newFileName,
           })
-          .then(res => {
+          .then((res) => {
             this.snackbar.message = res.data.message;
             this.snackbar.act = true;
           });
       }
       this.chdialogValues.act = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -195,5 +232,8 @@ export default {
   visibility: hidden;
   width: 0;
   height: 0;
+}
+.card-title {
+  font-size: 1rem;
 }
 </style>

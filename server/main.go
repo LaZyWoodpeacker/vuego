@@ -65,6 +65,7 @@ func (s *oServer) start() *oServer {
 	if s.socket != nil {
 		r.Handle("/api/socket/", sockMidlware(s.socket))
 	}
+	r.PathPrefix("/api/static").Handler(http.StripPrefix("/api/static", http.FileServer(http.Dir("."))))
 	r.PathPrefix("/").Handler(http.FileServer(assetFS()))
 	err := http.ListenAndServe(fmt.Sprintf(":%d", s.Port), handlers.LoggingHandler(os.Stdout, r))
 	_check(err)
@@ -133,7 +134,6 @@ func fileWatcher(s *socketio.Server) {
 			log.Println("error:", err)
 		}
 	}
-	//
 }
 
 func main() {
