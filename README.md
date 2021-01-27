@@ -1,21 +1,29 @@
-# VueGo
+# VueGo создает веб сервис на go. Позволяет упаковать все файлы в один бинарник с маленьким размером. 
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
+## Проект собирается так
+### Собирается проект фронта. В данном случае клиент на Vue.js.
 ```
 npm run build
 ```
-
-### build assets for Go
+### Собираем при помощи go-bindata-assetfs папку ./dist в виртуальную файловую систему для go
 ```
 npm run buildAssets
+```
+### В зависимости от необходимой платформы собираем
+```
+npm run buildservNix
+```
+#### Или 
+```
+npm run buildservWin
+```
+
+## Для отладки
+### C рабочим сервером достаточно его запустить
+```
+npm run runServ
+```
+### Потом запустить девсер для фронтенда
+```
+npm run serve
 ```
